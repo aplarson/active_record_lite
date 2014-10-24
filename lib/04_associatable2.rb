@@ -28,3 +28,47 @@ module Associatable
     end
   end
 end
+
+
+class Relation
+  attr_accessor :table_name
+  include Searchable
+  
+  def self.import_array_methods
+    Array.new.methods.each do |method_name|
+      puts method_name
+      define_method(method_name) do
+        if @results.nil?
+          search
+        end
+        @results.send(method_name)
+      end
+    end
+  end
+  
+  def initialize(table_name, where_values)
+    @table_name = table_name
+    @where_values_hash = where_values
+  end
+  
+  def where_values_hash
+    @where_values_hash ||= {}
+  end
+  
+  def search
+    where_clause = where_values_hash.keys.map { |column| "#{column} = ?"}
+                                         .join(' AND ')
+    values_to_find = where_values_hash.values.map { |val| val.to_s }
+    results = DBConnection.execute(<<-SQL, *values_to_find)
+      SELECT
+        *
+      FROM
+        #{self.table_name}
+      WHERE
+        #{where_clause} 
+    SQL
+    @results = table_name.camelize.singularize.constantize.parse_all(results)
+  end
+  
+  import_array_methods
+end

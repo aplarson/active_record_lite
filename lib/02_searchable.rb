@@ -3,17 +3,10 @@ require_relative '01_sql_object'
 
 module Searchable
   def where(params)
-    where_clause = params.keys.map { |column| "#{column} = ?"}.join(' AND ')
-    values_to_find = params.values.map { |val| val.to_s }
-    results = DBConnection.execute(<<-SQL, *values_to_find)
-      SELECT
-        *
-      FROM
-        #{self.table_name}
-      WHERE
-        #{where_clause} 
-    SQL
-    parse_all(results)
+    unless @where_values_hash.nil?
+      params = @where_values_hash.merge(params)
+    end
+    Relation.new(self.table_name, params)
   end
 end
 
