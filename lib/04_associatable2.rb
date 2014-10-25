@@ -35,13 +35,13 @@ class Relation
   include Searchable
   
   def self.import_array_methods
-    Array.new.methods.each do |method_name|
+    (Array.instance_methods - self.instance_methods).each do |method_name|
       puts method_name
-      define_method(method_name) do
+      define_method(method_name) do |*args|
         if @results.nil?
           search
         end
-        @results.send(method_name)
+        @results.send(method_name, *args)
       end
     end
   end
@@ -72,10 +72,4 @@ class Relation
   
   import_array_methods
   
-  def [](idx)
-    if @results.nil?
-      search
-    end
-    @results[idx]
-  end
 end
