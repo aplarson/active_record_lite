@@ -71,4 +71,11 @@ class Relation
   end
   
   import_array_methods
+  
+  def [](idx)
+    if @results.nil?
+      search
+    end
+    @results[idx]
+  end
 end
