@@ -8,6 +8,7 @@ class AssocOptions
     :class_name,
     :primary_key
   )
+  attr_reader :assoc_type
 
   def model_class
     class_name.constantize
@@ -28,6 +29,7 @@ class BelongsToOptions < AssocOptions
     @foreign_key = options[:foreign_key]
     @primary_key = options[:primary_key]
     @class_name = options[:class_name]
+    @assoc_type = :belongs_to
   end
 end
 
@@ -41,6 +43,7 @@ class HasManyOptions < AssocOptions
     @foreign_key = options[:foreign_key]
     @primary_key = options[:primary_key]
     @class_name = options[:class_name]
+    @assoc_type = :has_many
   end
 end
 

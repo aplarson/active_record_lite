@@ -32,9 +32,23 @@ module Associatable
     define_method(name) do
       through_options = self.class.assoc_options[through_name]
       source_options = through_options.model_class.assoc_options[source_name]
-      through_val = self.send(through_options.primary_key)
+      
       source_table = source_options.table_name
       through_table = through_options.table_name
+      if source_options.type = :belongs_to
+        join = "#{source_table}.#{source_options.primary_key}
+          = #{through_table}.#{source_options.foreign_key}"
+      else
+        join = "#{source_table}.#{source_options.foreign_key}
+          = #{through_table}.#{source_options.primary_key}"
+      end
+      if through_options.type = :has_many
+        where = "#{through_table}.#{through_options.foreign_key} = ?"
+        through_val = self.send(through_options.primary_key)
+      else
+        where = "#{through_table}.#{through_options.primary_key} = ?"
+        through_val = self.send(through_options.foreign_key)
+      end
       results = DBConnection.execute(<<-SQL, through_val)
         SELECT
           #{source_table}.*
@@ -43,10 +57,9 @@ module Associatable
         JOIN
           #{through_table}
         ON
-          #{source_table}.#{source_options.primary_key}
-          = #{through_table}.#{source_options.foreign_key}
+          #{join}
         WHERE
-          #{through_table}.#{through_options.foreign_key} = ?
+          #{where} = ?
       SQL
       source_options.model_class.parse_all(results)
     end
