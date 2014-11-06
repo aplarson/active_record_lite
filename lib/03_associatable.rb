@@ -58,6 +58,7 @@ module Associatable
 
   def has_many(name, options = {})
     options = HasManyOptions.new(name, self.to_s, options)
+    assoc_options[name.to_sym] = options
     define_method(name.to_sym) do
       primary_key_val = self.send(options.primary_key)
       class_to_search = options.model_class
