@@ -40,7 +40,7 @@ module Associatable
           = #{through_table}.#{source_options.foreign_key}"
       else
         join = "#{source_table}.#{source_options.foreign_key}
-          = #{through_table}.#{source_options.primary_key}"
+           = #{through_table}.#{source_options.primary_key}"
       end
       if through_options.type = :has_many
         where = "#{through_table}.#{through_options.foreign_key} = ?"
@@ -73,10 +73,9 @@ class Relation
   
   def self.import_array_methods
     (Array.instance_methods - self.instance_methods).each do |method_name|
-      puts method_name
       define_method(method_name) do |*args|
         if @results.nil?
-          search
+          query
         end
         @results.send(method_name, *args)
       end
@@ -92,7 +91,7 @@ class Relation
     @where_values_hash ||= {}
   end
   
-  def search
+  def query
     where_clause = where_values_hash.keys.map { |column| "#{column} = ?"}
                                          .join(' AND ')
     values_to_find = where_values_hash.values.map { |val| val.to_s }
@@ -105,6 +104,11 @@ class Relation
         #{where_clause} 
     SQL
     @results = table_name.camelize.singularize.constantize.parse_all(results)
+  end
+  
+  #needs to be implemented in query to fetch all matching items
+  def includes(association)
+    @inclusion = association
   end
   
   import_array_methods
