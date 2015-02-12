@@ -1,3 +1,3 @@
-# Active Record Lite!
+# Hacktive Record
 
-Active Record Lite project
+Reproduction of core Active Record ORM features
